@@ -1,4 +1,3 @@
 """SQLKite is a tool for managing and interfacing with databases, which can be particularly appealing for developers
 who are familiar with SQL and looking for an ORM solution"""
 
-from .base import SQLKite
