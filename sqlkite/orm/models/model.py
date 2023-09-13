@@ -1,4 +1,5 @@
 from sqlkite.orm.db import Database
+from sqlkite.orm.models.fields import CharField, IntegerField
 
 
 class Model:
@@ -23,15 +24,13 @@ class Model:
         if not hasattr(cls, 'table_name'):
             raise ValueError("Model must define a 'table_name' attribute.")
 
-            # Define the columns explicitly
         columns = [
-            "id INTEGER PRIMARY KEY AUTOINCREMENT",
-            "username TEXT",
-            "email TEXT"
-            # Add more columns as needed
+            f"{field_name} {field.__class__.__name__}"
+            for field_name, field in cls.__dict__.items()
+            if isinstance(field, (CharField, IntegerField))
         ]
 
-        query = f"CREATE TABLE IF NOT EXISTS {cls.table_name} ({', '.join(columns)})"
+        query = f"CREATE TABLE IF NOT EXISTS {cls.table_name} (id INTEGER PRIMARY KEY AUTOINCREMENT, {', '.join(columns)})"
         cls.db.execute(query)
 
     def __init__(self, **kwargs):
