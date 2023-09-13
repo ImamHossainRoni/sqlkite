@@ -23,8 +23,11 @@ class Model:
 
     @classmethod
     def create_table(cls):
-        if not hasattr(cls, 'table_name'):
-            raise ValueError("Model must define a 'table_name' attribute.")
+        if hasattr(cls, 'Meta') and hasattr(cls.Meta, 'table_name') and cls.Meta.table_name:
+            table_name = cls.Meta.table_name
+        else:
+            # Use the default table name based on the class name
+            table_name = cls.__name__.lower()
 
         columns = [
             f"{field_name} {field.__class__.__name__}"
@@ -32,7 +35,7 @@ class Model:
             if isinstance(field, (CharField, IntegerField))
         ]
 
-        query = f"CREATE TABLE IF NOT EXISTS {cls.table_name} (id INTEGER PRIMARY KEY AUTOINCREMENT, {', '.join(columns)})"
+        query = f"CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY AUTOINCREMENT, {', '.join(columns)})"
         cls.db.execute(query)
 
     def __init__(self, **kwargs):
@@ -43,5 +46,12 @@ class Model:
     def save(self):
         fields = ', '.join([f"'{key}'" for key in vars(self).keys() if key != 'id'])
         values = ', '.join([f"'{value}'" for value in vars(self).values() if value and value != self.id])
-        query = f"INSERT INTO {self.table_name} ({fields}) VALUES ({values})"
+
+        if hasattr(self, 'Meta') and hasattr(self.Meta, 'table_name') and self.Meta.table_name:
+            table_name = self.Meta.table_name
+        else:
+            # Use the default table name based on the class name
+            table_name = self.__class__.__name__.lower()
+
+        query = f"INSERT INTO {table_name} ({fields}) VALUES ({values})"
         self.db.execute(query)
