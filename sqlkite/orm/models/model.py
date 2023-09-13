@@ -17,7 +17,9 @@ class Model:
     """
 
     db = Database('database.db')
-    table_name = ''
+
+    class Meta:
+        table_name = ''
 
     @classmethod
     def create_table(cls):
